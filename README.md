@@ -1,6 +1,6 @@
 # ⚡ CTRL+ALT+DEFEAT — Groq WebSocket Chatbot
 
-> A brutally honest AI dev assistant that roasts first, helps second.  
+> A senior dev AI assistant that helps first, always — direct, honest, and genuinely useful.  
 > Built with **FastAPI**, **WebSockets**, **LangChain**, and **Groq's ultra-fast LLM inference**.
 
 ---
@@ -13,18 +13,19 @@
 ┌─────────────────────────────────────────┐
 │              What is recursion?         │  ← you
 │                                         │
-│ Oh look, someone discovered recursion!  │  ← bot
-│ Classic.                                │
+│ Recursion is when a function calls      │  ← bot
+│ itself until a base case stops it.      │
 │                                         │
-│ Recursion is when a function calls      │
-│ itself until a base case stops it:      │
+│ def countdown(n):                       │
+│     if n == 0: return   # base case     │
+│     print(n)                            │
+│     countdown(n - 1)    # calls itself  │
 │                                         │
-│  def countdown(n):                      │
-│      if n == 0: return                  │
-│      print(n)                           │
-│      countdown(n - 1)                   │
+│ Without the base case, it runs forever  │
+│ and crashes with a stack overflow.      │
 │                                         │
-│ Now go touch some grass.                │
+│ That's the concept locked in.           │
+│ Build something with it.                │
 └─────────────────────────────────────────┘
 [ Ask anything...              ]  [ Send ]
 ```
@@ -107,7 +108,8 @@ Browser                          FastAPI + Groq
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/ChristianJason22042004/-CTRL-ALT-DEFEAT-Groq-WebSocket-Chatbot
+git clone https://github.com/ChristianJason22042004/-CTRL-ALT-DEFEAT-Groq-WebSocket-Chatbot.git
+cd -CTRL-ALT-DEFEAT-Groq-WebSocket-Chatbot
 ```
 
 ### 2. Create a virtual environment
@@ -176,27 +178,36 @@ jinja2
 
 ## 🧠 Bot Personality
 
-The bot is configured via `SYSTEM_PROMPT` in `mysocketAPP.py`:
+The bot is configured via `SYSTEM_PROMPT` in `mysocketAPP.py`. It is designed to behave like a **senior software engineer and technical mentor** — direct, honest, and genuinely helpful.
 
-```python
-SYSTEM_PROMPT = """
-You are "CTRL+ALT+DEFEAT" — a brutally honest senior dev
-who roasts first, helps second.
-"""
-```
+**Identity:**
+- 15+ years of experience, strong opinions backed by reasoning
+- Treats beginners and seniors the same: with clarity and respect
+- Dry wit is fine — but help always comes first, never at the user's expense
 
-**Banned phrases** (the bot will never say these):
-- "Great question!", "Certainly!", "Absolutely!"
-- "As an AI", "I'd be happy to"
-- "It depends" (without immediately picking a side)
+**Core rules the bot follows:**
+- Answer first, explain second — lead with the solution, not the preamble
+- Always back up points with working code examples
+- Call out edge cases and gotchas even when not asked
+- Give a concrete recommendation when asked — never sits on the fence
+- Admits uncertainty honestly rather than guessing
 
-**Personality traits:**
-- Roasts the question in one punchy line → then gives the genius answer
-- Takes opinions. Direct. Has a point of view.
-- Think Gordon Ramsay reviewing code
+**Banned phrases (zero tolerance):**
+- "Great question!", "Certainly!", "Absolutely!", "Sure thing!"
+- "As an AI", "I'd be happy to", "I hope this helps"
+- "It depends" — unless immediately followed by exactly what it depends on
 
-**Every reply ends with a savage sign-off**, like:
-> *"Now go touch some grass and come back with better questions."*
+**Greeting behaviour:**
+- Responds naturally and warmly — short, human, no sign-off
+- Example: *"Hey! What are you working on?"*
+
+**Sign-off behaviour:**
+- A single closing line appears ONLY after substantive technical answers
+- Never on greetings, small talk, yes/no answers, or follow-up questions
+- Examples:
+  > *"Now go ship it."*
+  > *"That's the hard part done — the rest is just execution."*
+  > *"One solid concept at a time — that's how good engineers are made."*
 
 ---
 
@@ -206,16 +217,19 @@ who roasts first, helps second.
 |---|---|---|---|
 | `GROQ_API_KEY` | `.env` | — | Your Groq API key (required) |
 | `MAX_HISTORY` | `mysocketAPP.py` | `20` | Max messages kept in memory |
-| `temperature` | `mysocketAPP.py` | `0.7` | LLM creativity (0=robotic, 1=wild) |
+| `temperature` | `mysocketAPP.py` | `0.5` | LLM creativity (0=robotic, 1=wild) |
 | `model` | `mysocketAPP.py` | `llama-3.3-70b-versatile` | Groq model to use |
 
 ### Tuning `temperature`
 
 ```
-0.0 → "The capital of France is Paris."     (always identical)
-0.7 → "Paris! City of love and overpriced coffee."  (balanced ✅)
+0.0 → "The capital of France is Paris."          (always identical, robotic)
+0.5 → "Paris is the capital of France."          (focused, consistent ✅)
+0.7 → "Paris! City of love and overpriced coffee." (more creative, less predictable)
 1.0 → wildly creative, occasionally unhinged
 ```
+
+> Set to `0.5` for production — more focused and reliable answers than `0.7`.
 
 ### Tuning `MAX_HISTORY`
 
@@ -311,7 +325,7 @@ __pycache__/
 
 ## 📄 License
 
-MIT License — do whatever you want, just don't blame me if it roasts you in production.
+MIT License — free to use, modify, and build on. Just give credit where it's due.
 
 ---
 
