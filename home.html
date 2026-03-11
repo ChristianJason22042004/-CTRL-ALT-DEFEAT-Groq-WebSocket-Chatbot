@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Groq Chatbot</title>
+
+    <!-- MathJax config — MUST be before the script tag below -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath:  [['$',  '$' ]],   // $x^2$ → inline math
+                displayMath: [['$$', '$$']]    // $$x^2$$ → block math
+            }
+        };
+    </script>
+
+    <!-- marked  = renders Markdown (bold, lists, code blocks) -->
+    <!-- MathJax = renders LaTeX math formulas                 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* page center */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 680px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f0f2f5;
+        }
+
+        h2 { color: #1a1a2e; margin-bottom: 4px; }
+
+        /* small status line under title */
+        #status { font-size: 12px; margin-bottom: 10px; }
+        #status.connected    { color: #28a745; }
+        #status.disconnected { color: #dc3545; }
+        #status.thinking     { color: #fd7e14; }
+
+        /* scrollable chat area */
+        #chatbox {
+            height: 460px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            overflow-y: auto;
+            overflow-x: hidden;   /* no horizontal scroll on page */
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+
+        /* each message row */
+        .user { text-align: right; margin: 8px 0; }
+        .bot  { text-align: left;  margin: 8px 0; }
+
+        /* user bubble — right side, blue */
+        .user span {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        /* bot bubble — left side, grey, full width so math/code fits */
+        .bot span {
+            display: block;
+            background: #f1f3f5;
+            color: #1a1a1a;
+            padding: 12px 16px;
+            border-radius: 18px 18px 18px 4px;
+            max-width: 100%;
+            overflow-x: auto;     /* scroll if formula/code too wide */
+            box-sizing: border-box;
+        }
+
+        /* math overflow fix */
+        mjx-container { display: block !important; overflow-x: auto; max-width: 100%; }
+
+        /* code block styling */
+        pre  { background: #1e1e1e; color: #f8f8f8; padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+        code { font-family: 'Courier New', monospace; font-size: 13px; }
+
+        /* basic markdown element spacing */
+        p          { margin: 4px 0; }
+        ul, ol     { margin: 4px 0; padding-left: 20px; }
+        h1,h2,h3   { margin: 8px 0; }
+
+        /* input + send button row */
+        #inputrow { display: flex; gap: 8px; }
+
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input:focus   { border-color: #007bff; }
+
+        button {
+            padding: 10px 22px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        button:hover    { background: #0056b3; }
+        button:disabled { background: #adb5bd; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <h2>⚡ Groq Chatbot</h2>
+    <div id="status" class="disconnected">● Connecting...</div>
+
+    <div id="chatbox"></div>
+
+    <div id="inputrow">
+        <!-- disabled until WebSocket connects -->
+        <input  id="userInput" type="text" placeholder="Ask anything..." disabled />
+        <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+    </div>
+
+    <script>
+        // grab elements once — faster than querying every time
+        const chatbox  = document.getElementById("chatbox");
+        const input    = document.getElementById("userInput");
+        const sendBtn  = document.getElementById("sendBtn");
+        const statusEl = document.getElementById("status");
+
+        // open WebSocket connection to FastAPI backend
+        const ws = new WebSocket("ws://localhost:8000/ws");
+
+        // fires when connection opens — enable the input
+        ws.onopen = () => {
+            setStatus("connected", "● Connected");
+            input.disabled   = false;
+            sendBtn.disabled = false;
+            input.focus();             // auto-focus so user can type right away
+        };
+
+        // fires when connection drops — lock the input
+        ws.onclose = () => {
+            setStatus("disconnected", "● Disconnected — refresh page");
+            input.disabled   = true;
+            sendBtn.disabled = true;
+        };
+
+        // fires on any connection error
+        ws.onerror = () => setStatus("disconnected", "● Connection error");
+
+        // fires when bot sends a reply
+        ws.onmessage = (event) => {
+            addMessage("bot", event.data);   // render the reply
+            setStatus("connected", "● Connected");
+            sendBtn.disabled = false;        // unlock send button
+        };
+
+        // called on button click OR Enter key
+        function sendMessage() {
+            const message = input.value.trim();
+            if (!message) return;             // ignore empty sends
+
+            addMessage("user", message);      // show user bubble immediately
+            ws.send(message);                 // send to FastAPI WebSocket
+            input.value      = "";
+            sendBtn.disabled = true;          // wait for reply before re-enabling
+            setStatus("thinking", "● Thinking...");
+        }
+
+        // allow Enter key to send
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // creates a message bubble and appends it to chatbox
+        function addMessage(who, text) {
+            const div  = document.createElement("div");
+            div.className = who;              // "user" or "bot" — drives CSS side
+
+            const span = document.createElement("span");
+
+            if (who === "bot") {
+                span.innerHTML = marked.parse(text);  // Markdown → HTML
+                MathJax.typesetPromise([span]);        // LaTeX → rendered math
+            } else {
+                span.textContent = text;               // user text stays plain
+            }
+
+            div.appendChild(span);
+            chatbox.appendChild(div);
+            chatbox.scrollTop = chatbox.scrollHeight;  // scroll to latest message
+        }
+
+        // updates the status dot text + colour class
+        function setStatus(cls, text) {
+            statusEl.className   = cls;
+            statusEl.textContent = text;
+        }
+    </script>
+
+</body>
+</html>
