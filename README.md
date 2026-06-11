@@ -311,5 +311,3 @@ MIT License — free to use, modify, and build on. Just give credit where it's d
 - [MathJax](https://www.mathjax.org/) for beautiful math typesetting
 
 ---
-
-*Built with ☕
