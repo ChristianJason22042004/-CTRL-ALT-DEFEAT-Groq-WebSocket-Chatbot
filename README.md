@@ -130,21 +130,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up your `.env` file
-
-```bash
-# Create .env in the project root
-touch .env
-```
-
-Add your Groq API key inside `.env`:
-
-```
-GROQ_API_KEY=gsk_your_key_here
-```
-
-> Get your free API key at [console.groq.com](https://console.groq.com)
-
 ### 5. Run the server
 
 ```bash
