@@ -213,14 +213,13 @@ The bot is configured via `SYSTEM_PROMPT` in `mysocketAPP.py`. It is designed to
 0.7 → "Paris! City of love and overpriced coffee." (more creative, less predictable)
 1.0 → wildly creative, occasionally unhinged
 ```
-
-> Set to `0.5` for production — more focused and reliable answers than `0.7`.
+productions always use 0.1 to 0.2 to be more direct and factual rather than being creative.
 
 ### Tuning `MAX_HISTORY`
 
 ```
 Higher → bot remembers more context, but uses more tokens (slower/costlier)
-Lower  → bot forgets older messages faster, but stays snappy
+Lower  → bot forgets older messages faster, but stays quick,fast and highly reliable.
 ```
 
 ---
@@ -231,21 +230,10 @@ The bot keeps a **sliding window** of conversation history:
 
 ```python
 MAX_HISTORY = 20
+discards last/old 20 messages from 0 to 19 index for context window.
 
 if len(history) > MAX_HISTORY:
     history = [history[0]] + history[-(MAX_HISTORY - 1):]
-```
-
-```
-[SystemPrompt] [H1] [A1] [H2] [A2] ... [H10] [A10] [H11]
-      ↑                                                ↑
-  always kept                                    newest kept
-
-After trim:
-[SystemPrompt] [A1] [H2] [A2] ... [H10] [A10] [H11]
-                ↑
-           H1 dropped (oldest)
-```
 
 The **SystemPrompt is always preserved** at index `[0]` — the bot never forgets its personality.
 
@@ -324,4 +312,4 @@ MIT License — free to use, modify, and build on. Just give credit where it's d
 
 ---
 
-*Built with ☕ and a complete disregard for imposter syndrome.*
+*Built with ☕
