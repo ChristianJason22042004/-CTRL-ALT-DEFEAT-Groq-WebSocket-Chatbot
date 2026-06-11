@@ -130,7 +130,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. Run the server
+### 4. Run the server
 
 ```bash
 uvicorn mysocketAPP:mcpapp --reload
@@ -138,7 +138,7 @@ uvicorn mysocketAPP:mcpapp --reload
 
 > `mysocketAPP` = your filename (`mysocketAPP.py`) — `mcpapp` = the FastAPI instance inside it (`mcpapp = FastAPI()`)
 
-### 6. Open the app
+### 5. Open the app
 
 ```
 http://localhost:8000
